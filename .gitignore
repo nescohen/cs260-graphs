@@ -1,2 +1,6 @@
 # Virtual Env Environment
 env/
+
+# swap
+*.swp
+*.swo
