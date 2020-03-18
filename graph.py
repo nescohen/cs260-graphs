@@ -34,6 +34,8 @@ class Graph:
         else:
             return False
 
+    # Implementation of Dijkstra's shortest path algorithm
+    # only returns length of path, not nodes
     def dijkstras(self, start, destination):
         unvisited = list(self.nodes.keys())
         distance = {nodeId: 0 if nodeId == start else float('inf') 
@@ -53,7 +55,36 @@ class Graph:
             curr = min(unvisited, key=distance.get)
         return distance[destination]
 
-# First create an example graph with a coupld of nodes
+    # Implementation of Prim's algorithm assuming all edges are unidirectional
+    # Returns a new graph representing the MST
+    def prims(self):
+        result = Graph()
+        rmap = {}
+        unconnected = list(self.nodes.keys())
+        cost = {nodeId: float('inf') for (nodeId, _) in self.nodes.items()}
+        connection = {nodeId: None for (nodeId, _) in self.nodes.items()}
+        while True:
+            if len(unconnected) <= 0:
+                break
+            curr = min(unconnected, key=cost.get)
+            unconnected.remove(curr)
+            newCurr = result.addNode(curr)
+            rmap[curr] = newCurr
+            if connection[curr] != None:
+                e = connection[curr]
+                dest = e[0] if e[1] == curr else e[1]
+                result.addEdge(newCurr, dest, 1)
+                result.addEdge(dest, newCurr, 1)
+            for edge in filter(lambda e: e[0] == curr or e[1] == curr, self.edges):
+                other = edge[0] if edge[1] == curr else edge[1]
+                weight = edge[2]
+                if other in unconnected and weight < cost[other]:
+                    cost[other] = weight
+                    connection[other] = edge
+        return result
+
+
+# First create an example graph with a couple of nodes
 print("Creating a graph with 2 nodes A and B")
 g = Graph()
 aId = g.addNode("A")
@@ -91,7 +122,7 @@ for i in range(0, r.randint(10, 30)):
     toNode = r.choice(nodeList)
     weight = r.randint(0, 10)
     rg.addEdge(fromNode, toNode, weight)
-print("Edges:")
+print("Edges (from, to, weight):")
 pprint(rg.edges)
 print("Three randomly chosen paths:")
 for i in range(0, 3):
@@ -100,3 +131,9 @@ for i in range(0, 3):
     print("Shortest path from " +
             rg.nodes[start] + " to " + rg.nodes[stop] + ":")
     print(rg.dijkstras(start, stop))
+print("Prim's algorithm to find minimum spanning tree of random graph")
+mst = rg.prims()
+print("Nodes:")
+pprint(mst.nodes)
+print("Edges (from, to, weight):")
+pprint(mst.edges)
